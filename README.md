@@ -32,5 +32,5 @@ A Python script that automates HR tasks (mostly generating .xlsx files).
    ```sh
     python3 main.py "JICDC Attendance 20 April-7 May 2022 V2.xls"
     ```
-   Output file will be saved to the current working director as "Actual Attendance Report.xlsx"
+   Output file will be saved to the current working directory as "Actual Attendance Report.xlsx"
 
