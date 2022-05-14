@@ -1,3 +1,11 @@
+"""
+HR EXCEL AUTOMATION Script
+- A Python script that automates HR tasks (mostly generating .xlsx files).
+
+Created by: Nadeem Abdelkader on 9/5/2022
+Last updated by Nadeem Abdelkader on 14/5/2022
+"""
+
 import sys
 
 import pandas as pd
@@ -28,15 +36,29 @@ team_dict = {
 
 
 def main(filename):
+    """
+    This is the main function that calls all the helper functions to generate the required .xlsx file based on the
+    information read from the provided file
+    :param filename: filename to read from
+    :return: void (generates output file - "Actual Attendance Report.xlsx")
+    """
     workbook = xlsxwriter.Workbook('Actual Attendance Report.xlsx')
     worksheet = workbook.add_worksheet()
     write_headings(workbook, worksheet)
     df = create_df(filename)
     write_rows(df, workbook, worksheet)
     workbook.close()
+    return
 
 
 def write_rows(df, workbook, worksheet):
+    """
+    This function writes the records from the pandas data frame to the output .xlsx file
+    :param df: data frame to read data from
+    :param workbook: workbook to write to
+    :param worksheet: worksheet to write to
+    :return: void
+    """
     row_i = 1
     dates = df.Date.unique()
     for i in dates:
@@ -46,9 +68,18 @@ def write_rows(df, workbook, worksheet):
                 write_records(cell_format, row, row_i, worksheet)
                 row_i += 1
         row_i += 2
+    return
 
 
 def write_records(cell_format, row, row_i, worksheet):
+    """
+    This is a helper function that writes the formatted recrods to the output .xlsx file
+    :param cell_format: format to use when writing the records
+    :param row: contains the data for each record
+    :param row_i: index to start from
+    :param worksheet: worksheet to write to
+    :return: void
+    """
     try:
         worksheet.write(row_i, 0, row['Emp No.'], cell_format)
     except TypeError:
@@ -100,9 +131,17 @@ def write_records(cell_format, row, row_i, worksheet):
         worksheet.write(row_i, 11, "", cell_format)
     except TypeError:
         worksheet.write(row_i, 11, "", cell_format)
+    return
 
 
 def set_cell_format(row, workbook):
+    """
+    This function is responsible for setting the cell format based on the Employee's team, which is obtained from the
+    team_dict
+    :param row: row to set format of
+    :param workbook: workbook to write to
+    :return: cell_format: the format to should be applied to this particular row
+    """
     cell_format = ""
     if team_dict[row['Name']] == "Oracle":
         cell_format = workbook.add_format(
@@ -123,6 +162,11 @@ def set_cell_format(row, workbook):
 
 
 def create_df(filename):
+    """
+    This function reads data from the input .xls or .xlsx to a pandas data frame
+    :param filename: file to read from
+    :return: df: data frame populated with data from the input .xls or .xlsx file
+    """
     p.save_book_as(file_name=filename, dest_file_name=filename + "x")
     pd_xl_file = pd.ExcelFile(filename + "x")
     df = pd_xl_file.parse("Sheet 1")
@@ -132,6 +176,12 @@ def create_df(filename):
 
 
 def write_headings(workbook, worksheet):
+    """
+    This function formats and writes the header cells
+    :param workbook: workbook to write to
+    :param worksheet: worksheet to write to
+    :return: void
+    """
     cell_format = workbook.add_format(
         {'border': True, 'align': 'center', 'pattern': 1, 'bg_color': '#d0cece', 'text_wrap': False, 'bold': True,
          'size': '14', 'font': 'Times New Roman'})
@@ -147,7 +197,11 @@ def write_headings(workbook, worksheet):
     worksheet.write('J1', 'Missing Days', cell_format)
     worksheet.write('K1', 'Missing Days Notes', cell_format)
     worksheet.write('L1', 'Overtime Notes', cell_format)
+    return
 
 
 if __name__ == "__main__":
+    """
+    Gets input file name for the command line arguments and passes it to the main() function to start the application
+    """
     main(sys.argv[1])
