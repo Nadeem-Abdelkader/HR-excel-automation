@@ -7,7 +7,7 @@ Last updated by Nadeem Abdelkader on 14/5/2022
 """
 
 import sys
-
+import math
 import pandas as pd
 import pyexcel as p
 import xlsxwriter
@@ -19,14 +19,19 @@ team_dict = {
     "Mohamed Magdy": "Oracle",
     # "": "MSSQL",
     "Sameh Khedr": "SnrNetSec",
+    "Sameh Kheder": "SnrNetSec",
     "Amr AbdelRahman": "NetSec",
+    "Amr Abdelrahman": "NetSec",
     "Ahmed Fouad Gendy": "NetSec",
+    "Ahmed Fouad": "NetSec",
     "Waleed ElSadek": "NetSec",
     "Ahmed I.Shalaby": "NetSec",
+    "Ahmed Shalaby": "NetSec",
     "Hussien Magdy": "Sys",
     "Hassan Abdou": "Sys",
     "Ahmed Safwat Mousa": "Sys",
-    "Momen Taher": "Oracle",
+    "Ahmed Safwat": "Sys",
+    "Momen": "Oracle",
     # "Momen": "Oracle",
     "Lobna Alkomy": "Sys",
     "Mohamed Algohary": "MSSQL",
@@ -117,10 +122,10 @@ def write_records(cell_format, row, row_i, worksheet):
     except TypeError:
         worksheet.write(row_i, 8, "", cell_format)
     try:
-        if row['Absent'] == True:
-            worksheet.write(row_i, 9, 1, cell_format)
+        if math.isnan(float(row['Clock In'])) and math.isnan(float(row['Clock Out'])) :
+            worksheet.write(row_i, 9, '1', cell_format)
         else:
-            worksheet.write(row_i, 9, '', cell_format)
+            worksheet.write(row_i, 9, '-', cell_format)
     except TypeError:
         worksheet.write(row_i, 9, "", cell_format)
     try:
@@ -143,21 +148,25 @@ def set_cell_format(row, workbook):
     :return: cell_format: the format to should be applied to this particular row
     """
     cell_format = ""
-    if team_dict[row['Name']] == "Oracle":
+    if row['Name'] in team_dict:
+        if team_dict[row['Name']] == "Oracle":
+            cell_format = workbook.add_format(
+                {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': '#f7caac', 'font': 'Times New Roman'})
+        elif team_dict[row['Name']] == "MSSQL":
+            cell_format = workbook.add_format(
+                {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': '#c5e0b3', 'font': 'Times New Roman'})
+        elif team_dict[row['Name']] == "SnrNetSec":
+            cell_format = workbook.add_format(
+                {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': '#1e4e79', 'font': 'Times New Roman'})
+        elif team_dict[row['Name']] == "NetSec":
+            cell_format = workbook.add_format(
+                {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': '#bdd6ee', 'font': 'Times New Roman'})
+        elif team_dict[row['Name']] == "Sys":
+            cell_format = workbook.add_format(
+                {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': '#ffe598', 'font': 'Times New Roman'})
+    else:
         cell_format = workbook.add_format(
-            {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': '#f7caac', 'font': 'Times New Roman'})
-    elif team_dict[row['Name']] == "MSSQL":
-        cell_format = workbook.add_format(
-            {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': '#c5e0b3', 'font': 'Times New Roman'})
-    elif team_dict[row['Name']] == "SnrNetSec":
-        cell_format = workbook.add_format(
-            {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': '#1e4e79', 'font': 'Times New Roman'})
-    elif team_dict[row['Name']] == "NetSec":
-        cell_format = workbook.add_format(
-            {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': '#bdd6ee', 'font': 'Times New Roman'})
-    elif team_dict[row['Name']] == "Sys":
-        cell_format = workbook.add_format(
-            {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': '#ffe598', 'font': 'Times New Roman'})
+            {'align': 'center', 'border': True, 'pattern': 1, 'bg_color': 'white', 'font': 'Times New Roman'})
     return cell_format
 
 
@@ -167,10 +176,10 @@ def create_df(filename):
     :param filename: file to read from
     :return: df: data frame populated with data from the input .xls or .xlsx file
     """
-    p.save_book_as(file_name=filename, dest_file_name=filename + "x")
-    pd_xl_file = pd.ExcelFile(filename + "x")
-    df = pd_xl_file.parse("Sheet 1")
-    df = df[['Emp No.', 'Name', 'Date', 'On duty', 'Off duty', 'Clock In', 'Clock Out', 'Late', 'Early', 'Absent']]
+    # p.save_book_as(file_name=filename, dest_file_name=filename)
+    pd_xl_file = pd.ExcelFile(filename)
+    df = pd_xl_file.parse("05-May")
+    df = df[['Emp No.', 'Name', 'Date', 'On duty', 'Off duty', 'Clock In', 'Clock Out', 'Late', 'Early']]
     df = df.replace(to_replace='Momen', value='Momen Taher')
     return df
 
