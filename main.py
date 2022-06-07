@@ -11,6 +11,8 @@ import sys
 import pandas as pd
 import pyexcel as p
 import xlsxwriter
+from datetime import datetime, date
+
 
 team_dict = {
     "Ayman Essawy": "Oracle",
@@ -124,13 +126,21 @@ def write_records(cell_format, row, row_i, worksheet):
     except TypeError:
         worksheet.write(row_i, 9, "", cell_format)
     try:
-        worksheet.write(row_i, 10, "", cell_format)
-    except TypeError:
-        worksheet.write(row_i, 10, "", cell_format)
+        clock_in = datetime.strptime(str(row['Clock In']), '%H:%M')
+        clock_out = datetime.strptime(str(row['Clock Out']), '%H:%M')
+        on_duty = datetime.strptime(str(row['On duty']), '%H:%M')
+        off_duty = datetime.strptime(str(row['Off duty']), '%H:%M')
+        overtime_hrs = (on_duty - off_duty) - (clock_in - clock_out)
+        if overtime_hrs.total_seconds() > 0:
+            worksheet.write(row_i, 11, str(overtime_hrs)[:-3], cell_format)
+        else:
+            worksheet.write(row_i, 11, "", cell_format)
+    except:
+        worksheet.write(row_i, 11, "", cell_format)
     try:
-        worksheet.write(row_i, 11, "", cell_format)
+        worksheet.write(row_i, 10, "", cell_format)
     except TypeError:
-        worksheet.write(row_i, 11, "", cell_format)
+        worksheet.write(row_i, 10, "", cell_format)
     return
 
 
