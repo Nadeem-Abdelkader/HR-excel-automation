@@ -126,6 +126,10 @@ def write_records(cell_format, row, row_i, worksheet):
     except TypeError:
         worksheet.write(row_i, 9, "", cell_format)
     try:
+        worksheet.write(row_i, 10, "", cell_format)
+    except TypeError:
+        worksheet.write(row_i, 10, "", cell_format)
+    try:
         clock_in = datetime.strptime(str(row['Clock In']), '%H:%M')
         clock_out = datetime.strptime(str(row['Clock Out']), '%H:%M')
         on_duty = datetime.strptime(str(row['On duty']), '%H:%M')
@@ -137,10 +141,6 @@ def write_records(cell_format, row, row_i, worksheet):
             worksheet.write(row_i, 11, "", cell_format)
     except:
         worksheet.write(row_i, 11, "", cell_format)
-    try:
-        worksheet.write(row_i, 10, "", cell_format)
-    except TypeError:
-        worksheet.write(row_i, 10, "", cell_format)
     return
 
 
