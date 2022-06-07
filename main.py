@@ -11,6 +11,8 @@ import math
 import pandas as pd
 import pyexcel as p
 import xlsxwriter
+import datetime
+
 
 team_dict = {
     "Ayman Essawy": "Oracle",
@@ -69,9 +71,12 @@ def write_rows(df, workbook, worksheet):
     for i in dates:
         for index, row in df.iterrows():
             cell_format = set_cell_format(row, workbook)
-            if row['Date'] == i:
-                write_records(cell_format, row, row_i, worksheet)
-                row_i += 1
+            try:
+                if row['Date'] == i:
+                    write_records(cell_format, row, row_i, worksheet)
+                    row_i += 1
+            except:
+                continue
         row_i += 2
     return
 
@@ -94,31 +99,40 @@ def write_records(cell_format, row, row_i, worksheet):
     except TypeError:
         worksheet.write(row_i, 5, "", cell_format)
     try:
-        worksheet.write(row_i, 2, row['Date'], cell_format)
+        worksheet.write(row_i, 2, str(row['Date'])[:-9], cell_format)
     except TypeError:
         worksheet.write(row_i, 5, "", cell_format)
     try:
-        worksheet.write(row_i, 3, row['On duty'], cell_format)
+        worksheet.write(row_i, 3, str(row['On duty'])[:-3], cell_format)
     except TypeError:
         worksheet.write(row_i, 5, "", cell_format)
     try:
-        worksheet.write(row_i, 4, row['Off duty'], cell_format)
+        worksheet.write(row_i, 4, str(row['Off duty'])[:-3], cell_format)
     except TypeError:
         worksheet.write(row_i, 5, "", cell_format)
     try:
-        worksheet.write(row_i, 5, row['Clock In'], cell_format)
+        if str(row['Clock In']) != "nan":
+            worksheet.write(row_i, 5, str(row['Clock In'])[:-3], cell_format)
+        else:
+            worksheet.write(row_i, 5, "-", cell_format)
     except TypeError:
         worksheet.write(row_i, 5, "-", cell_format)
     try:
-        worksheet.write(row_i, 6, row['Clock Out'], cell_format)
+        if str(row['Clock Out']) != "nan":
+            worksheet.write(row_i, 6, str(row['Clock Out'])[:-3], cell_format)
+        else:
+            worksheet.write(row_i, 6, "-", cell_format)
     except TypeError:
         worksheet.write(row_i, 6, "-", cell_format)
     try:
-        worksheet.write(row_i, 7, row['Late'], cell_format)
+        worksheet.write(row_i, 7, str(row['Late'])[:-3], cell_format)
     except TypeError:
         worksheet.write(row_i, 7, "", cell_format)
     try:
-        worksheet.write(row_i, 8, row['Early'], cell_format)
+        if str(row['Early']) != "nan":
+            worksheet.write(row_i, 8,str(row['Early'])[:-3], cell_format)
+        else:
+            worksheet.write(row_i, 8, "", cell_format)
     except TypeError:
         worksheet.write(row_i, 8, "", cell_format)
     try:
@@ -133,9 +147,33 @@ def write_records(cell_format, row, row_i, worksheet):
     except TypeError:
         worksheet.write(row_i, 10, "", cell_format)
     try:
-        worksheet.write(row_i, 11, "", cell_format)
+        # print(type(row['On duty']))
+        # print("a")
+        # print(type(row['Off duty']))
+        # print("a")
+        # print(type(row['Clock In']))
+        # print("a")
+        # print(type(row['Clock Out']))
+
+        on_duty = datetime.datetime.combine(datetime.date(2011, 1, 1), datetime.time(row['On duty'].hour, row['On duty'].minute))
+        off_duty = datetime.datetime.combine(datetime.date(2011, 1, 1), datetime.time(row['Off duty'].hour, row['Off duty'].minute))
+        clock_in = datetime.datetime.combine(datetime.date(2011, 1, 1), datetime.time(row['Clock In'].hour, row['Clock In'].minute))
+        clock_out = datetime.datetime.combine(datetime.date(2011, 1, 1), datetime.time(row['Clock Out'].hour, row['Clock Out'].minute))
+
+        overtime_hrs = (on_duty - off_duty) - (clock_in - clock_out)
+        if overtime_hrs.total_seconds() > 0:
+            worksheet.write(row_i, 11, str(overtime_hrs)[:-3], cell_format)
+        else:
+            worksheet.write(row_i, 11, "", cell_format)
+        # print(type(a))
+        # overtime_hrs = (row['On duty'] - row['Off duty']) - (row['Clock In'] - row['Clock Out'])
+        # if overtime_hrs.total_seconds() > 0:
+        #     worksheet.write(row_i, 11, str(overtime_hrs)[:-3], cell_format)
+        # else:
+        #     worksheet.write(row_i, 11, "", cell_format)
+
     except TypeError:
-        worksheet.write(row_i, 11, "", cell_format)
+        worksheet.write(row_i, 11, "d", cell_format)
     return
 
 
@@ -179,6 +217,7 @@ def create_df(filename):
     # p.save_book_as(file_name=filename, dest_file_name=filename)
     pd_xl_file = pd.ExcelFile(filename)
     df = pd_xl_file.parse("05-May")
+    #df = pd_xl_file.parse("28-31May")
     df = df[['Emp No.', 'Name', 'Date', 'On duty', 'Off duty', 'Clock In', 'Clock Out', 'Late', 'Early']]
     df = df.replace(to_replace='Momen', value='Momen Taher')
     return df
